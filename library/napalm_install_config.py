@@ -63,7 +63,11 @@ options:
     config_file:
         description:
           - Path to the file to load the configuration from
-        required: True
+        required: False 
+    config_str:
+        description:
+          - String containing the configuration
+        required: False
     commit_changes:
         description:
           - If set to True the configuration will be actually merged or replaced. If the set to False,
@@ -145,7 +149,8 @@ def main():
             password=dict(type='str', required=True, no_log=True),
             timeout=dict(type='int', required=False, default=60),
             optional_args=dict(required=False, type='dict', default=None),
-            config_file=dict(type='str', required=True),
+            config_file=dict(type='str', required=False),
+            config_str=dict(type='str', required=False),
             dev_os=dict(type='str', required=True, choices=['eos', 'junos', 'iosxr', 'fortios', 'ibm', 'ios', 'nxos']),
             commit_changes=dict(type='bool', required=True),
             replace_config=dict(type='bool', required=False, default=False),
@@ -164,6 +169,7 @@ def main():
     password = module.params['password']
     timeout = module.params['timeout']
     config_file = module.params['config_file']
+    config_str = module.params['config_str']
     commit_changes = module.params['commit_changes']
     replace_config = module.params['replace_config']
     diff_file = module.params['diff_file']
@@ -187,9 +193,9 @@ def main():
 
     try:
         if replace_config:
-            device.load_replace_candidate(filename=config_file)
+            device.load_replace_candidate(filename=config_file, config=config_str)
         else:
-            device.load_merge_candidate(filename=config_file)
+            device.load_merge_candidate(filename=config_file, config=config_str)
     except Exception, e:
         module.fail_json(msg="cannot load config: " + str(e))
 
